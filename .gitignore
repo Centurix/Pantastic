@@ -1,0 +1,6 @@
+.idea
+app.log
+*.ini
+!configspec.ini
+*.pyc
+*.pyo

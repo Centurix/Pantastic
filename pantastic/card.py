@@ -2,12 +2,32 @@
 # -*- coding: utf-8 -*-
 import logging
 
+"""
+Build a new card class where groups of numbers are passed in
+The card class looks at the card groupings as well as the total card length, IIN and luhn
+and then includes the group lengths in the decision on the card type.
+"""
+
 
 class Card:
     def __init__(self, number):
         self.number = number
         self.valid_luhn = self.luhn_check(self.number)
         self.issuer = self.get_issuer(self.number)
+
+    def get_industry(self, number):
+        return {
+            '0': 'ISO / TC 68 and other industry assignments',
+            '1': 'Airlines',
+            '2': 'Airlines, financial and other future industry assignments',
+            '3': 'Travel and entertainment',
+            '4': 'Banking and financial',
+            '5': 'Banking and financial',
+            '6': 'Merchandising and banking / financial',
+            '7': 'Petroleum and other future industry assignments',
+            '8': 'Healthcare, telecommunications and other future industry assignments',
+            '9': 'For assignment by national standards bodies'
+        }[number:1]
 
     def get_issuer(self, number):
         if number[0] == '1' and len(number) == 15:

@@ -16,7 +16,7 @@ class Pantastic:
                 self.scan_file(os.path.join(root, filename))
 
     def scan_file(self, filename):
-        logging.info('Scanning %s...' % filename)
+        # logging.info('Scanning %s...' % filename)
 
         if os.path.getsize(filename) == 0:
             logging.info('Empty file, skipping')
@@ -29,122 +29,38 @@ class Pantastic:
                 if not file_buffer:
                     break
 
-                # Find groups of numbers between 4 and 19 characters in length
-                number_groups = re.finditer('\d{4,19}', file_buffer, re.MULTILINE | re.DOTALL)
+                number_groups = list(re.finditer('\d{1,19}', file_buffer, re.MULTILINE | re.DOTALL))
 
-                for number_group in number_groups:
-                    logging.info('Number group at %d: %s' % (number_group.start(), number_group.group(0)))
+                for index, group in enumerate(number_groups):
+                    if len(group.group(0)) >= 4:
+                        # Now attempt to build a CC number until we are greater than 19 digits
+                        test_index = index
+                        group_count = 1
+                        test_string = number_groups[test_index].group(0)
+                        while len(test_string) <= 19 and group_count <= (len(test_string) / 4) + 1:
+                            if len(test_string) < 12 and len(number_groups[test_index].group(0)) < 4:  # All groupings below 12 digits are more than 4 digits in length
+                                break
 
-                # Are these groups parts of a credit card number?
-
-                # Different methods to find card numbers here. Numbers between 12 and 19 digits long
-                # 999999999999
-                # 9999999999999
-                # 99999999999999
-                # 999999999999999
-                # 9999999999999999
-                # 99999999999999999
-                # 999999999999999999
-                # 9999999999999999999
-
-                # 9999-9999-9999
-                # 9999-9999-9999-9
-                # 9999-9999-9999-99
-                # 9999-9999-9999-999
-                # 9999-9999-9999-9999
-                # 9999-9999-9999-9999-9
-                # 9999-9999-9999-9999-99
-                # 9999-9999-9999-9999-999
-
-                # 9999 9999 9999
-                # 9999 9999 9999 9
-                # 9999 9999 9999 99
-                # 9999 9999 9999 999
-                # 9999 9999 9999 9999
-                # 9999 9999 9999 9999 9
-                # 9999 9999 9999 9999 99
-                # 9999 9999 9999 9999 999
-
-                # Then look for quads in separate fields in a database
-
-                # spaced_numbers_19 = re.finditer('[^\d\-\s]\d{4}[\-\s]\d{4}[\-\s]\d{4}[\-\s]\d{4}[\-\s]\d{3}[^\d\-\s]', file_buffer, re.MULTILINE | re.DOTALL)
-                # spaced_numbers_18 = re.finditer('[^\d\-\s]\d{4}[\-\s]\d{4}[\-\s]\d{4}[\-\s]\d{4}[\-\s]\d{2}[^\d\-\s]', file_buffer, re.MULTILINE | re.DOTALL)
-                # spaced_numbers_17 = re.finditer('[^\d\-\s]\d{4}[\-\s]\d{4}[\-\s]\d{4}[\-\s]\d{4}[\-\s]\d[^\d\-\s]', file_buffer, re.MULTILINE | re.DOTALL)
-
-                # spaced_numbers_16 = re.finditer(
-                #     '[^0-9\- ]\d{4}[ ]\d{4}[ ]\d{4}[ ]\d{4}[^0-9\- ]',
-                #     file_buffer,
-                #     re.MULTILINE | re.DOTALL
-                # )
-
-                # spaced_numbers_15 = re.finditer('[^\d\-\s]\d{4}[\-\s]\d{4}[\-\s]\d{4}[\-\s]\d{3}[^\d\-\s]', file_buffer, re.MULTILINE | re.DOTALL)
-                # spaced_numbers_14 = re.finditer('[^\d\-\s]\d{4}[\-\s]\d{4}[\-\s]\d{4}[\-\s]\d{2}[^\d\-\s]', file_buffer, re.MULTILINE | re.DOTALL)
-                # spaced_numbers_13 = re.finditer('[^\d\-\s]\d{4}[\-\s]\d{4}[\-\s]\d{4}[\-\s]\d[^\d\-\s]', file_buffer, re.MULTILINE | re.DOTALL)
-                #
-                # spaced_numbers_12 = re.finditer('[^\d\-\s]\d{4}[\-\s]\d{4}[\-\s]\d{4}[^\d\-\s]', file_buffer, re.MULTILINE | re.DOTALL)
-                #
-                # for number in spaced_numbers_19:
-                #     logging.info(number.group(0))
-                #
-                # for number in spaced_numbers_18:
-                #     logging.info(number.group(0))
-                #
-                # for number in spaced_numbers_17:
-                #     logging.info(number.group(0))
-
-                # for number in spaced_numbers_16:
-                #     logging.info(number.group(0))
-
-                # for number in spaced_numbers_15:
-                #     logging.info(number.group(0))
-                #
-                # for number in spaced_numbers_14:
-                #     logging.info(number.group(0))
-                #
-                # for number in spaced_numbers_13:
-                #     logging.info(number.group(0))
-                #
-                # for number in spaced_numbers_12:
-                #     logging.info(number.group(0))
-
-                        # numbers = re.finditer('\d{4}', file_buffer, re.MULTILINE | re.DOTALL)
-                #
-                # last_end = -2
-                #
-                # for number in numbers:
-                #     if number.start() - last_end > 0:
-                #         logging.info(last_end)
-                #         logging.info(number.start())
-                #         logging.info('Number start %s found at %d' % (number.group(0), number.start()))
-                #         last_end = number.end()
-                #     else:
-                #         last_end = number.end()
-
-                # if len(numbers) > 0:
-                #     logging.info('Found card numbers!')
-                #     for number in numbers:
-                #         logging.info('Number: %s' % number)
-
-                # numbers = re.findall('\d', file_buffer, re.MULTILINE | re.DOTALL)
-                # if len(numbers) > 0:
-                #     number_buffer = ''.join(numbers)
-                #
-                # logging.info('Here are all the numbers in the file %s' % number_buffer)
-                #
-                # for index in range(0, len(number_buffer)):
-                #     for card_length in range(12, 19):
-                #         card = Card(number_buffer[index:index + card_length])
-                #         if card.valid_luhn and card.issuer != 'Unknown':
-                #             logging.info('Found card (%s): %s' % (card.issuer, number_buffer[index:index + card_length]))
-
-    def reduce(self, numbers1, numbers2):
-        reduced_numbers = []
-        for number1 in numbers1:
-            found = False
-            for number2 in numbers2:
-                if number1.start() == number2.start():
-                    found = True
-            if not found:
-                reduced_numbers.append(number1)
-
-        return reduced_numbers
+                            if len(test_string) >= 12:  # Minimum credit card length
+                                card = Card(test_string)
+                                if card.valid_luhn and card.issuer != 'Unknown':  # Basic card check
+                                    distance = number_groups[test_index].end() - group.start()
+                                    if distance < len(test_string) + 5:  # Is the distance between the first card group and the last reasonable?
+                                        logging.info('File: %s, Card Found (%s): %s, Group Count: %d, Group Distance: %d, Start Position: %d' % (
+                                            filename,
+                                            card.issuer,
+                                            test_string,
+                                            group_count,
+                                            distance,
+                                            number_groups[test_index].start()
+                                        ))
+                                        # for test_index2 in range(index, test_index + 1):
+                                        #     logging.info('Group: %s' % number_groups[test_index2].group(0))
+                                        break
+                            test_index += 1
+                            group_count += 1
+                            if test_index > len(number_groups) - 1:
+                                break
+                            if group_count <= 3 and len(number_groups[test_index].group(0)) < 4:
+                                break
+                            test_string += number_groups[test_index].group(0)

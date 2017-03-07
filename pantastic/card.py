@@ -6,6 +6,10 @@ import logging
 Build a new card class where groups of numbers are passed in
 The card class looks at the card groupings as well as the total card length, IIN and luhn
 and then includes the group lengths in the decision on the card type.
+
+Track data information: http://www.gae.ucm.es/~padilla/extrawork/tracks.html
+Track data country codes: http://www.gae.ucm.es/~padilla/extrawork/country.txt
+Track data examples: http://www.gae.ucm.es/~padilla/extrawork/magexam1.html
 """
 
 
@@ -14,6 +18,149 @@ class Card:
         self.number = number
         self.valid_luhn = self.luhn_check(self.number)
         self.issuer = self.get_issuer(self.number)
+
+    @staticmethod
+    def fromCardNumber(number):
+        return Card(number)
+
+    @staticmethod
+    def fromCardGroups(number_groups):  # List of MatchObjects from a regex search of numbers
+        card_number = ''
+        for group in number_groups:
+            card_number += group.group(0)
+
+        return Card(card_number)
+
+    @staticmethod
+    def detectTrackType(data):
+        """
+        Scan the data for the type of track
+        """
+        if data[:1] == '%':  # Possible track 1, check the rest
+            tokens = data.split('^')
+            if len(tokens) != 3 or len(data) > 79:  # Not valid track data
+                return None
+
+            if tokens[2][-2:-1] != '?':  # No valid end sentinel
+                return None
+
+            if not (str.isalpha(tokens[0][1:2]) and str.isupper(tokens[0][1:2])):  # Format code must be upper case alpha
+                return None
+
+            if len(tokens[0][2:]) < 12:  # Not a valid PAN
+                return None
+
+            return 1
+
+        if data[:1] == ';':  # Possible track 2 or 3 data, check the rest
+            tokens = data.split('=')
+            if len(tokens) == 2:  # Track 2
+                if len(data) > 40:
+                    return None
+
+                if len(tokens[0][1:]) < 12:  # Not a valid PAN
+                    return None
+
+                return 2
+
+            if len(tokens) == 6:  # Track 3
+                if len(data) > 107:
+                    return None
+
+                if not str.isdigit(tokens[0][1:3]):  # Not a valid FC
+                    return None
+
+                if len(tokens[0][3:]) < 12:  # Not a valid PAN
+                    return None
+
+                return 3
+
+        return None
+
+    @staticmethod
+    def fromTrack1Data(track1):
+        """
+        Track 1
+        =======
+        %B1234567890123445^PADILLA/L.                ^99011200000000000000**XXX******?*
+        ^^^               ^^                         ^^   ^       ^         ^        ^^
+        |||_ Card number  ||_ Card holder            ||   |       |         |_ CVV** ||_ LRC
+        ||_ Format code   |_ Field separator         ||   |       |                  |_ End sentinel
+        |_ Start sentinel           Field separator _||   |       |_ Discretionary data
+                                          Expiration _|   |_ Service code
+        """
+        tokens = track1.split('^')
+
+        if len(tokens) != 3 or len(track1) > 79:  # Not enough tokens or not long enough
+            return None
+
+        if tokens[0][:1] != '%':  # Missing start sentinel
+            return None
+
+        if not (str.isalpha(tokens[0][1:2]) and str.isupper(tokens[0][1:2])):  # Format code must be upper case alpha
+            return None
+
+        if len(tokens[0][2:]) < 12:  # Not a valid PAN
+            return None
+
+        return Card(tokens[0][2:])
+
+    @staticmethod
+    def fromTrack2Data(track2):
+        """
+        Track 2
+        =======
+        ;1234567890123445=99011200XXXX00000000?*
+        ^^               ^^   ^   ^           ^^
+        ||_ Card number  ||   |   |_ Encrypted||_ LRC
+        |_ Start sentinel||   |      PIN***   |_ End sentinel
+                         ||   |_ Service code
+        Field separator _||_ Expiration
+        """
+        tokens = track2.split('=')
+
+        if len(tokens) != 2 or len(track2) > 40:
+            return None
+
+        if tokens[0][:1] != ';':
+            return None
+
+        if len(tokens[0][1:]) < 12:  # Not a valid PAN
+            return None
+
+        return Card(tokens[0][1:])
+
+    @staticmethod
+    def fromTrack3Data(track3):
+        """
+        Track 3
+        =======
+        ;011234567890123445=724724100000000000030300XXXX040400099010=************************==1=0000000000000000?*
+        ^^ ^               ^^  ^  ^            ^ ^  ^   ^^ ^   ^    ^^                       ^^^^^               ^^
+        || |               ||  |  |_ Currency  | |  |   || |   |    ||_ First subsidiary     |||||_ Additional   ||
+        || |               ||  |     exponent  | |  |   || |   |    |   account number (FSAN)||||   data         ||
+        || |_ Card number  ||  |_ Currency     | |  |   || |   |    |_ Field separator       ||||_ Field         ||_ LRC
+        ||_ Format code    ||     (Peseta)     | |  |   || |   |_ Expiration                 |||   separator     |_ End sentinel
+        |_ Start sentinel  ||_ Country (Spain) | |  |   || |_ FSAN service restriction       |||_ Relay marker
+                           |_ Field separator  | |  |   ||_ PAN service restriction          ||_ Field separator
+                                 Cycle length _| |  |   |_ Interchange control               |_ Field separator
+                                    Retry count _|  |_ Encrypted PIN***
+        """
+        tokens = track3.split('=')
+
+        if len(tokens) != 6 or len(track3) > 107:
+            return None
+
+        if tokens[0][:1] != ';':
+            return None
+
+        if not str.isdigit(tokens[0][1:3]):  # FC: 00-99
+            return None
+
+        if len(tokens[0][3:]) < 12:  # Valid PAN length, may be optional if this is used with track 2 data
+            return None
+
+        return Card(tokens[0][3:])
 
     def get_industry(self, number):
         return {

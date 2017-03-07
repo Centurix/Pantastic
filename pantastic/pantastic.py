@@ -5,6 +5,7 @@ import os
 import mmap
 import re
 from card import Card
+import pprint
 
 class Pantastic:
     def __init__(self):
@@ -16,6 +17,17 @@ class Pantastic:
                 self.scan_file(os.path.join(root, filename))
 
     def scan_file(self, filename):
+
+        # pprint.pprint(Card.detectTrackType('%B1234567890123445^PADILLA/L.                ^99011200000000000000**XXX******?*'))
+        # pprint.pprint(Card.detectTrackType(';1234567890123445=99011200XXXX00000000?*'))
+        # pprint.pprint(Card.detectTrackType(';011234567890123445=724724100000000000030300XXXX040400099010=************************==1=0000000000000000?*'))
+        #
+        # card = Card.fromTrack1Data('%B1234567890123445^PADILLA/L.                ^99011200000000000000**XXX******?*')
+        #
+        # pprint.pprint(card)
+        #
+        # return
+
         # logging.info('Scanning %s...' % filename)
 
         if os.path.getsize(filename) == 0:
@@ -42,7 +54,7 @@ class Pantastic:
                                 break
 
                             if len(test_string) >= 12:  # Minimum credit card length
-                                card = Card(test_string)
+                                card = Card.fromCardNumber(test_string)
                                 if card.valid_luhn and card.issuer != 'Unknown':  # Basic card check
                                     distance = number_groups[test_index].end() - group.start()
                                     if distance < len(test_string) + 5:  # Is the distance between the first card group and the last reasonable?

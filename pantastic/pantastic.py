@@ -7,6 +7,7 @@ import re
 from card import Card
 import pprint
 
+
 class Pantastic:
     def __init__(self):
         pass
@@ -34,6 +35,13 @@ class Pantastic:
             logging.info('Empty file, skipping')
             return
 
+        file_components = os.path.splitext(filename)
+
+        if len(file_components) > 1:
+            if file_components[1] in ['.gz', '.zip', '.rar', '7z', '.bzip']:
+                logging.info('File: %s, Compressed file, unsupported, skipping' % filename)
+                return
+
         with open(filename) as file_handle:
             mm = mmap.mmap(file_handle.fileno(), 0, prot=mmap.PROT_READ, flags=mmap.MAP_PRIVATE)
             while True:
@@ -58,14 +66,15 @@ class Pantastic:
                                 if card.valid_luhn and card.issuer != 'Unknown':  # Basic card check
                                     distance = number_groups[test_index].end() - group.start()
                                     if distance < len(test_string) + 5:  # Is the distance between the first card group and the last reasonable?
-                                        logging.info('File: %s, Card Found (%s): %s, Group Count: %d, Group Distance: %d, Start Position: %d' % (
-                                            filename,
-                                            card.issuer,
-                                            test_string,
-                                            group_count,
-                                            distance,
-                                            number_groups[test_index].start()
-                                        ))
+                                        logging.info('%s    %s  %s', filename, card.issuer, test_string)
+                                        # logging.info('File: %s, Card Found (%s): %s, Group Count: %d, Group Distance: %d, Start Position: %d' % (
+                                        #     filename,
+                                        #     card.issuer,
+                                        #     test_string,
+                                        #     group_count,
+                                        #     distance,
+                                        #     number_groups[test_index].start()
+                                        # ))
                                         # for test_index2 in range(index, test_index + 1):
                                         #     logging.info('Group: %s' % number_groups[test_index2].group(0))
                                         break

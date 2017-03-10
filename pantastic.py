@@ -31,8 +31,34 @@ def main():
         level=config.LOG_LEVELS[config.setting['log_level']]
     )
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
-    pan_manager = Pantastic()
-    pan_manager.scan_location(config.setting['dir'])
+
+    ignore_cards = []
+    if config.setting['ignore_cards'] != '':
+        with open(config.setting['ignore_cards'], 'r') as ignore_cards_handle:
+            ignore_cards = ignore_cards_handle.read().splitlines()
+
+    ignore_iins = []
+    if config.setting['ignore_iins'] != '':
+        with open(config.setting['ignore_iins'], 'r') as ignore_iins_handle:
+            ignore_iins = ignore_iins_handle.read().splitlines()
+
+    ignore_industries = []
+    if config.setting['ignore_industries'] != '':
+        with open(config.setting['ignore_industries'], 'r') as ignore_industries_handle:
+            ignore_industries = ignore_industries_handle.read().splitlines()
+
+    pan_manager = Pantastic(
+        ignore_cards=ignore_cards,
+        ignore_iins=ignore_iins,
+        ignore_industries=ignore_industries,
+        ignore_deprecated=(config.setting['ignore_deprecated'] == 'True' or config.setting['ignore_deprecated'] == True)
+    )
+
+    if config.setting['dir'] != '':
+        pan_manager.scan_location(config.setting['dir'])
+
+    if config.setting['file'] != '':
+        pan_manager.scan_file(config.setting['file'])
 
     return EXIT_OK
 

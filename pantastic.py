@@ -57,7 +57,8 @@ def main():
         cards_per_file=int(config.setting['cards_per_file']),
         ignore_file_extensions=config.setting['ignore_file_extensions'],
         mask_card_number=(config.setting['mask_card_number'] == 'True' or config.setting['mask_card_number'] == True),
-        max_group_count=int(config.setting['max_group_count'])
+        max_group_count=int(config.setting['max_group_count']),
+        max_group_distance=int(config.setting['max_group_distance'])
     )
 
     if config.setting['dir'] != '':

@@ -20,7 +20,8 @@ class Pantastic:
             cards_per_file=0,
             ignore_file_extensions=[],
             mask_card_number=True,
-            max_group_count=0
+            max_group_count=0,
+            max_group_distance=0
     ):
         self.ignore_cards = ignore_cards
         self.ignore_iins = ignore_iins
@@ -32,6 +33,7 @@ class Pantastic:
         self.ignore_file_extensions = ignore_file_extensions
         self.mask_card_number = mask_card_number
         self.max_group_count = max_group_count
+        self.max_group_distance = max_group_distance
 
     def scan_location(self, location):
         """
@@ -97,7 +99,10 @@ class Pantastic:
                                         card.iin not in self.ignore_iins and \
                                         card.industry not in self.ignore_industries:  # Basic card check
                                     distance = number_groups[test_index].end() - group.start()
-                                    if distance < len(test_string) + 5:  # Is the distance between the first card group and the last reasonable?
+                                    max_distance = len(test_string) + 5
+                                    if self.max_group_distance != 0:
+                                        max_distance = self.max_group_distance
+                                    if distance < max_distance:  # Is the distance between the first card group and the last reasonable?
                                         if self.mask_card_number:
                                             logging.info('%s    %s  %s', filename, card.issuer, card.masked_number())
                                         else:

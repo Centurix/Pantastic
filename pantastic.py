@@ -54,7 +54,8 @@ def main():
         ignore_deprecated=(config.setting['ignore_deprecated'] == 'True' or config.setting['ignore_deprecated'] == True),
         minimum_digits=int(config.setting['minimum_digits']),
         maximum_digits=int(config.setting['maximum_digits']),
-        cards_per_file=int(config.setting['cards_per_file'])
+        cards_per_file=int(config.setting['cards_per_file']),
+        ignore_file_extensions=config.setting['ignore_file_extensions']
     )
 
     if config.setting['dir'] != '':

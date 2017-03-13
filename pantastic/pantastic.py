@@ -17,7 +17,8 @@ class Pantastic:
             ignore_deprecated=True,
             minimum_digits=12,
             maximum_digits=19,
-            cards_per_file=0
+            cards_per_file=0,
+            ignore_file_extensions=[]
     ):
         self.ignore_cards = ignore_cards
         self.ignore_iins = ignore_iins
@@ -26,6 +27,7 @@ class Pantastic:
         self.minimum_digits = minimum_digits
         self.maximum_digits = maximum_digits
         self.cards_per_file = cards_per_file
+        self.ignore_file_extensions = ignore_file_extensions
 
     def scan_location(self, location):
         """
@@ -46,6 +48,9 @@ class Pantastic:
         file_components = os.path.splitext(filename)
 
         if len(file_components) > 1:
+            if file_components[1] in self.ignore_file_extensions:
+                logging.info('File: %s, in ignored extension list, skipping' % filename)
+                return
             if file_components[1] in ['.gz', '.zip', '.rar', '7z', '.bzip']:
                 logging.info('File: %s, Compressed file, unsupported, skipping' % filename)
                 return

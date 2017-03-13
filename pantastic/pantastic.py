@@ -19,7 +19,8 @@ class Pantastic:
             maximum_digits=19,
             cards_per_file=0,
             ignore_file_extensions=[],
-            mask_card_number=True
+            mask_card_number=True,
+            max_group_count=0
     ):
         self.ignore_cards = ignore_cards
         self.ignore_iins = ignore_iins
@@ -30,6 +31,7 @@ class Pantastic:
         self.cards_per_file = cards_per_file
         self.ignore_file_extensions = ignore_file_extensions
         self.mask_card_number = mask_card_number
+        self.max_group_count = max_group_count
 
     def scan_location(self, location):
         """
@@ -79,6 +81,8 @@ class Pantastic:
                         group_count = 1
                         test_string = number_groups[test_index].group(0)
                         while len(test_string) <= self.maximum_digits and group_count <= (len(test_string) / 4) + 1:
+                            if self.max_group_count != 0 and group_count > self.max_group_count:  # Only cards with one big number
+                                break
                             if self.cards_per_file != 0 and card_count >= self.cards_per_file:  # Restrict the count within a single file
                                 break
                             if len(test_string) < self.minimum_digits and len(number_groups[test_index].group(0)) < 4:  # All groupings below n digits are more than 4 digits in length

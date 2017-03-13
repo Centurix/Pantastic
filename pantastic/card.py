@@ -357,3 +357,11 @@ class Card:
 
     def digits(self, number):
         return [int(i) for i in str(number)]
+
+    def masked_number(self):
+        """
+        Only return the first and last 4 digits of a card number
+        :return:
+        """
+        if len(self.number) > 8:
+            return '%s%s%s' % (self.number[:4], 'X' * (len(self.number) - 8), self.number[-4:])

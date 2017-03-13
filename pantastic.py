@@ -51,7 +51,9 @@ def main():
         ignore_cards=ignore_cards,
         ignore_iins=ignore_iins,
         ignore_industries=ignore_industries,
-        ignore_deprecated=(config.setting['ignore_deprecated'] == 'True' or config.setting['ignore_deprecated'] == True)
+        ignore_deprecated=(config.setting['ignore_deprecated'] == 'True' or config.setting['ignore_deprecated'] == True),
+        minimum_digits=int(config.setting['minimum_digits']),
+        maximum_digits=int(config.setting['maximum_digits'])
     )
 
     if config.setting['dir'] != '':

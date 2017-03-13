@@ -16,7 +16,8 @@ class Pantastic:
             ignore_industries=[],
             ignore_deprecated=True,
             minimum_digits=12,
-            maximum_digits=19
+            maximum_digits=19,
+            cards_per_file=0
     ):
         self.ignore_cards = ignore_cards
         self.ignore_iins = ignore_iins
@@ -24,6 +25,7 @@ class Pantastic:
         self.ignore_deprecated = ignore_deprecated
         self.minimum_digits = minimum_digits
         self.maximum_digits = maximum_digits
+        self.cards_per_file = cards_per_file
 
     def scan_location(self, location):
         """
@@ -50,7 +52,11 @@ class Pantastic:
 
         with open(filename) as file_handle:
             mm = mmap.mmap(file_handle.fileno(), 0, prot=mmap.PROT_READ, flags=mmap.MAP_PRIVATE)
+            card_count = 0
             while True:
+                if self.cards_per_file != 0 and card_count >= self.cards_per_file:
+                    break
+
                 file_buffer = mm.read(1024**2)
                 if not file_buffer:
                     break
@@ -58,12 +64,16 @@ class Pantastic:
                 number_groups = list(re.finditer('\d{1,19}', file_buffer, re.MULTILINE | re.DOTALL))
 
                 for index, group in enumerate(number_groups):
+                    if self.cards_per_file != 0 and card_count >= self.cards_per_file:
+                        break
                     if len(group.group(0)) >= 4:
                         # Now attempt to build a CC number until we are greater than 19 digits
                         test_index = index
                         group_count = 1
                         test_string = number_groups[test_index].group(0)
                         while len(test_string) <= self.maximum_digits and group_count <= (len(test_string) / 4) + 1:
+                            if self.cards_per_file != 0 and card_count >= self.cards_per_file:  # Restrict the count within a single file
+                                break
                             if len(test_string) < self.minimum_digits and len(number_groups[test_index].group(0)) < 4:  # All groupings below n digits are more than 4 digits in length
                                 break
 
@@ -78,6 +88,7 @@ class Pantastic:
                                     distance = number_groups[test_index].end() - group.start()
                                     if distance < len(test_string) + 5:  # Is the distance between the first card group and the last reasonable?
                                         logging.info('%s    %s  %s', filename, card.issuer, test_string)
+                                        card_count += 1
                                         break
                             test_index += 1
                             group_count += 1

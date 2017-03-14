@@ -1,6 +1,5 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-import logging
 
 """
 Build a new card class where groups of numbers are passed in

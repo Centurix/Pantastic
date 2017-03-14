@@ -5,7 +5,6 @@ import os
 import mmap
 import re
 from card import Card
-import pprint
 
 
 class Pantastic:

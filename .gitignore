@@ -4,3 +4,4 @@ app.log
 !configspec.ini
 *.pyc
 *.pyo
+*.csv

@@ -21,7 +21,8 @@ class Pantastic:
             ignore_file_extensions=[],
             mask_card_number=True,
             max_group_count=0,
-            max_group_distance=0
+            max_group_distance=0,
+            output=''
     ):
         self.ignore_cards = ignore_cards
         self.ignore_iins = ignore_iins
@@ -34,14 +35,33 @@ class Pantastic:
         self.mask_card_number = mask_card_number
         self.max_group_count = max_group_count
         self.max_group_distance = max_group_distance
+        self.output = output
+        self.output_handle = None
 
     def scan_location(self, location):
         """
         Walk a directory path recursively
         """
+        if self.output != '':
+            self.output_handle = open(self.output, 'w')
+            self.output_handle.write("filename,issuer,number\n")
+
         for root, directories, files in os.walk(location):
             for filename in files:
                 self.scan_file(os.path.join(root, filename))
+
+        if self.output_handle:
+            self.output_handle.close()
+
+    def scan_file_with_output(self, filename):
+        if self.output != '':
+            self.output_handle = open(self.output, 'w')
+            self.output_handle.write("filename,issuer,number\n")
+
+        self.scan_file(filename)
+
+        if self.output_handle:
+            self.output_handle.close()
 
     def scan_file(self, filename):
         """
@@ -104,9 +124,14 @@ class Pantastic:
                                         max_distance = self.max_group_distance
                                     if distance < max_distance:  # Is the distance between the first card group and the last reasonable?
                                         if self.mask_card_number:
-                                            logging.info('%s    %s  %s', filename, card.issuer, card.masked_number())
+                                            logging.info('%s,%s,%s', filename, card.issuer, card.masked_number())
+                                            if self.output_handle is not None:
+                                                self.output_handle.write("%s,%s,%s\n" % (filename, card.issuer, card.masked_number()))
                                         else:
-                                            logging.info('%s    %s  %s', filename, card.issuer, card.number)
+                                            logging.info('%s,%s,%s', filename, card.issuer, card.number)
+                                            if self.output_handle is not None:
+                                                self.output_handle.write(
+                                                    "%s,%s,%s\n" % (filename, card.issuer, card.number))
                                         card_count += 1
                                         break
                             test_index += 1

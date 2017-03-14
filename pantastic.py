@@ -58,14 +58,15 @@ def main():
         ignore_file_extensions=config.setting['ignore_file_extensions'],
         mask_card_number=(config.setting['mask_card_number'] == 'True' or config.setting['mask_card_number'] == True),
         max_group_count=int(config.setting['max_group_count']),
-        max_group_distance=int(config.setting['max_group_distance'])
+        max_group_distance=int(config.setting['max_group_distance']),
+        output=config.setting['output']
     )
 
     if config.setting['dir'] != '':
         pan_manager.scan_location(config.setting['dir'])
 
     if config.setting['file'] != '':
-        pan_manager.scan_file(config.setting['file'])
+        pan_manager.scan_file_with_output(config.setting['file'])
 
     return EXIT_OK
 

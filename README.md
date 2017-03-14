@@ -8,9 +8,19 @@ many different types of industries. Cards will be identified by their IIN and Lu
 compliance. Cards will be detected as single numbers or even as multiple groups of digits. Various
 options are included to assist in the identification of false positives.
 
+By default
+
+All options listed below can be used within configuration files. For example:
+
+`python ./pantastic.py --config_file=ignore_uatp.ini`
+
+`python ./pantastic.py --config_file=ignore_uatp.ini --dir=/`
+
+`python ./pantastic.py --config_file=banking_only.ini`
+
 ## Usage
 
-python ./pantastic.py [--config_file=*file*] [--log_file=*file*] [--log_level=*level*] [--dir=*location*] [--file=*file*] [--ignore_cards=*list file*] [--ignore_iins=*list file*] [--ignore_industries=*list file*] [--ignore_deprecated=*boolean*] [--minimum_digits=*integer*] [--maximum_digits=*integer*] [--cards_per_file=*integer*] [--ignore_file_extensions=*list file*] [--mask_card_number=*boolean*] [--max_group_count=*integer*] [--max_group_distance=*integer*] [--output=*file*]
+python ./pantastic.py [--config_file=*file*] [--log_file=*file*] [--log_level=*level*] [--ignore_cards=*list file*] [--ignore_iins=*list file*] [--ignore_industries=*list file*] [--ignore_deprecated=*boolean*] [--minimum_digits=*integer*] [--maximum_digits=*integer*] [--cards_per_file=*integer*] [--ignore_file_extensions=*list file*] [--mask_card_number=*boolean*] [--max_group_count=*integer*] [--max_group_distance=*integer*] [--output=*file*] --dir=*location* *or* --file=*file*
 
 **--config_file**
 [*filename*] A config file to use during operation. Files are in INI file format and the
@@ -22,14 +32,6 @@ options are identical to the command line option names. Default is `./pantastic.
 **--log_level**
 [*level*] Specify the level of logging to perform. Levels are *debug*,
 *info*, *warning*, *error*, *critical*. Default is *info*
-
-**--dir**
-[*directory*] A directory to scan. Either --dir or --file must be specified otherwise
-a scan will not occur.
-
-**--file**
-[*filename*] A file to scan. Either --dir or --file must be specified otherwise
-a scan will not occur.
 
 **--ignore_cards**
 [*filename*] A file containing a list of card numbers to ignore. Default is not to
@@ -103,3 +105,29 @@ the number plus 5. Default 0
 **--output**
 [*filename*] Send the found cards to this file in a CSV format containing the filename, issuer
 and card number obeying the *--mask_card_number* option above.
+
+**--dir**
+[*directory*] A directory to scan. Either --dir or --file must be specified otherwise
+a scan will not occur.
+
+**--file**
+[*filename*] A file to scan. Either --dir or --file must be specified otherwise
+a scan will not occur.
+
+## Example configuration files
+
+### Ignore UATP cards
+Create these two files
+
+**uatp.ini**
+```
+[default]
+dir=/home
+ignore_industries=ignore_uatp.txt
+```
+
+**ignore_uatp.txt**
+```
+1
+```
+

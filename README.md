@@ -139,6 +139,30 @@ Then run
 python ./pantastic.py --config_file=uatp.ini
 ```
 
+## Using the existing ignore paths and extensions
+Two exclusion files are included in the project
+
+* ignore_paths.txt
+* ignore_extensions.txt
+
+These files contain common exclusions on a Redhat type distribution of Linux. To
+use these files, create a file called `pantastic.ini` and fill it with the following.
+
+```
+[default]
+dir=/
+ignore_paths=ignore_paths.txt
+ignore_file_extensions=ignore_extensions.txt
+```
+
+Then just run
+
+```
+python ./pantastic.py
+```
+
+And it'll run a PAN scan.
+
 ## Notes
 This is a very organic project and needs considerable tidying up. It does
 comply to PEP8, but it's not particularly 'Pythonic'. It's a bit hacky in

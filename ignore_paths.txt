@@ -15,5 +15,7 @@
 /usr/sbin
 /usr/lib
 /usr/lib32
+/usr/lib64
 /usr/bin
 /var/lib
+/var/cache/yum

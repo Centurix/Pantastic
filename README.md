@@ -168,3 +168,13 @@ over the following files with the extensions:
 * .7z
 * .bzip
 * .bz2
+
+This was developed with Python V2, I suspect there's a little bit of work
+to get it into V3.
+
+The requirements are fairly straight forward, mostly standard python stuff. There
+shouldn't be any other fancy requirements.
+
+This has only been tested in Linux environments. Very interested to see if this
+works fine in Windows or on OSX. Haven't made any provisions with the exception
+of always using os.path.join() for file paths. YMMV.

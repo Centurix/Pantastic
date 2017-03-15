@@ -4,7 +4,6 @@ import logging
 import os
 import mmap
 import re
-import pprint
 from card import Card
 from chardet.universaldetector import UniversalDetector
 

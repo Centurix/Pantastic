@@ -17,5 +17,6 @@
 /usr/lib32
 /usr/lib64
 /usr/bin
+/usr/share/doc
 /var/lib
 /var/cache/yum

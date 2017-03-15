@@ -1,0 +1,4 @@
+.ko
+.so
+.pyc
+.pyo

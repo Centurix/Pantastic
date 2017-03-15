@@ -10,3 +10,10 @@
 /sbin
 /run
 /sys
+/usr/local/sbin
+/usr/local/bin
+/usr/sbin
+/usr/lib
+/usr/lib32
+/usr/bin
+/var/lib

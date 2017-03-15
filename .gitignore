@@ -7,3 +7,4 @@ app.log
 *.csv
 ignore_*.txt
 !ignore_paths.txt
+!ignore_extensions.txt

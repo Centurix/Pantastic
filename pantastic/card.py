@@ -243,7 +243,7 @@ class Card:
                 return
             if int(number[:6]) in range(560221, 560225 + 1) and len(number) == 16:
                 self.issuer = 'Bankcard'
-                self.iin = int(number[:6])
+                self.iin = number[:6]
                 self.deprecated = True
                 return
             if number[:2] in ['54', '55'] and len(number) == 16:

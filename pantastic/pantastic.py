@@ -4,7 +4,9 @@ import logging
 import os
 import mmap
 import re
+import pprint
 from card import Card
+from chardet.universaldetector import UniversalDetector
 
 
 class Pantastic:
@@ -76,13 +78,18 @@ class Pantastic:
             if file_components[1] in self.ignore_file_extensions:
                 logging.info('File: %s, in ignored extension list, skipping' % filename)
                 return
-            if file_components[1] in ['.gz', '.zip', '.rar', '7z', '.bzip']:
+            if file_components[1] in ['.gz', '.zip', '.rar', '.7z', '.bzip', '.bz2']:
                 logging.info('File: %s, Compressed file, unsupported, skipping' % filename)
                 return
 
-        with open(filename) as file_handle:
+        detector = UniversalDetector()
+
+        file_type = None
+
+        with open(filename, 'r') as file_handle:
             mm = mmap.mmap(file_handle.fileno(), 0, prot=mmap.PROT_READ, flags=mmap.MAP_PRIVATE)
             card_count = 0
+
             while True:
                 if self.cards_per_file != 0 and card_count >= self.cards_per_file:
                     break
@@ -91,7 +98,19 @@ class Pantastic:
                 if not file_buffer:
                     break
 
-                number_groups = list(re.finditer('\d{1,19}', file_buffer, re.MULTILINE | re.DOTALL))
+                if file_type is None:
+                    detector.reset()
+                    detector.feed(file_buffer)
+                    if detector.result['encoding'] is not None:
+                        file_type = detector.result['encoding']
+                    else:
+                        file_type = 'N/A'
+                    detector.close()
+
+                if file_type[:6] == 'UTF-16':
+                    number_groups = list(re.finditer('\d{1,19}', file_buffer.replace('\x00', ''), re.MULTILINE | re.DOTALL))
+                else:
+                    number_groups = list(re.finditer('\d{1,19}', file_buffer, re.MULTILINE | re.DOTALL))
 
                 for index, group in enumerate(number_groups):
                     if self.cards_per_file != 0 and card_count >= self.cards_per_file:

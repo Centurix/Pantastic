@@ -131,3 +131,36 @@ ignore_industries=ignore_uatp.txt
 1
 ```
 
+## Notes
+This is a very organic project and needs considerable tidying up. It does
+comply to PEP8, but it's not particularly 'Pythonic'. It's a bit hacky in
+parts as it required quick additions for certain situations, like supporting
+UTF-16.
+
+It's not the fastest scan in the world, but it is thorough. As they say:
+
+*"Make it work, then make it fast"*
+
+By default this is a very greedy script and will pick up a lot of valid
+'cards'. Although these can technically be called false positives they
+are cards that comply with the two simple checks of passing Luhn and
+containing a valid IIN.
+
+I suggest running the script in its default state to
+start with and then working through why so many card numbers are being
+picked up. For example, UATP cards are so broad in specification that
+any Luhn compliant number beginning with 1 and complying to the UATP
+card length will run a positive result. If you are sure that you will
+never see a UATP card in your organisation, then add the IIN or major
+industry number to the list of exclusions and run the script again.
+
+Currently, this script does not deal with compressed files. It may in
+the future, probably for the common .zip and .rar files. Currently it skips
+over the following files with the extensions:
+
+* .gz
+* .zip
+* .rar
+* .7z
+* .bzip
+* .bz2

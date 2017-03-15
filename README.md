@@ -177,4 +177,19 @@ shouldn't be any other fancy requirements.
 
 This has only been tested in Linux environments. Very interested to see if this
 works fine in Windows or on OSX. Haven't made any provisions with the exception
-of always using os.path.join() for file paths. YMMV.
+of always using os.path.join() for file paths. Come to think of it, I use mmap
+to read the data, and I think a couple of the options are different in Windows. YMMV.
+
+## Stuff I might do
+Add a max file size check
+
+Actually do some testing in Windows and OSX
+
+Add more logging for stuff other than info()
+
+Add some kind of progress feedback that you can turn on/off for when you run the
+script manually.
+
+Add output options for XML, JSON, HTML etc. Currently only does CSV.
+
+Actually start on compressed file support. http://stackoverflow.com/questions/5127921/can-mmap-and-gzip-collaborate

@@ -68,13 +68,13 @@ class Pantastic:
         Scan a single file
         """
         if os.path.getsize(filename) == 0:
-            logging.info('Empty file, skipping')
+            logging.info('Empty file %s, skipping' % filename)
             return
 
         file_components = os.path.splitext(filename)
 
         if len(file_components) > 1:
-            if file_components[1] in self.ignore_file_extensions:
+            if file_components[1] != '' and file_components[1] in self.ignore_file_extensions:
                 logging.info('File: %s, in ignored extension list, skipping' % filename)
                 return
             if file_components[1] in ['.gz', '.zip', '.rar', '.7z', '.bzip', '.bz2']:
@@ -85,76 +85,79 @@ class Pantastic:
 
         file_type = None
 
-        with open(filename, 'r') as file_handle:
-            mm = mmap.mmap(file_handle.fileno(), 0, prot=mmap.PROT_READ, flags=mmap.MAP_PRIVATE)
-            card_count = 0
+        try:
+            with open(filename, 'r') as file_handle:
+                mm = mmap.mmap(file_handle.fileno(), 0, prot=mmap.PROT_READ, flags=mmap.MAP_PRIVATE)
+                card_count = 0
 
-            while True:
-                if self.cards_per_file != 0 and card_count >= self.cards_per_file:
-                    break
-
-                file_buffer = mm.read(1024**2)
-                if not file_buffer:
-                    break
-
-                if file_type is None:
-                    detector.reset()
-                    detector.feed(file_buffer)
-                    if detector.result['encoding'] is not None:
-                        file_type = detector.result['encoding']
-                    else:
-                        file_type = 'N/A'
-                    detector.close()
-
-                if file_type[:6] == 'UTF-16':
-                    number_groups = list(re.finditer('\d{1,19}', file_buffer.replace('\x00', ''), re.MULTILINE | re.DOTALL))
-                else:
-                    number_groups = list(re.finditer('\d{1,19}', file_buffer, re.MULTILINE | re.DOTALL))
-
-                for index, group in enumerate(number_groups):
+                while True:
                     if self.cards_per_file != 0 and card_count >= self.cards_per_file:
                         break
-                    if len(group.group(0)) >= 4:
-                        # Now attempt to build a CC number until we are greater than 19 digits
-                        test_index = index
-                        group_count = 1
-                        test_string = number_groups[test_index].group(0)
-                        while len(test_string) <= self.maximum_digits and group_count <= (len(test_string) / 4) + 1:
-                            if self.max_group_count != 0 and group_count > self.max_group_count:  # Only cards with one big number
-                                break
-                            if self.cards_per_file != 0 and card_count >= self.cards_per_file:  # Restrict the count within a single file
-                                break
-                            if len(test_string) < self.minimum_digits and len(number_groups[test_index].group(0)) < 4:  # All groupings below n digits are more than 4 digits in length
-                                break
 
-                            if len(test_string) >= self.minimum_digits and test_string not in self.ignore_cards:  # Minimum credit card length
-                                card = Card.fromCardNumber(test_string)
-                                if self.ignore_deprecated and card.deprecated:
+                    file_buffer = mm.read(1024**2)
+                    if not file_buffer:
+                        break
+
+                    if file_type is None:
+                        detector.reset()
+                        detector.feed(file_buffer)
+                        if detector.result['encoding'] is not None:
+                            file_type = detector.result['encoding']
+                        else:
+                            file_type = 'N/A'
+                        detector.close()
+
+                    if file_type[:6] == 'UTF-16':
+                        number_groups = list(re.finditer('\d{1,19}', file_buffer.replace('\x00', ''), re.MULTILINE | re.DOTALL))
+                    else:
+                        number_groups = list(re.finditer('\d{1,19}', file_buffer, re.MULTILINE | re.DOTALL))
+
+                    for index, group in enumerate(number_groups):
+                        if self.cards_per_file != 0 and card_count >= self.cards_per_file:
+                            break
+                        if len(group.group(0)) >= 4:
+                            # Now attempt to build a CC number until we are greater than 19 digits
+                            test_index = index
+                            group_count = 1
+                            test_string = number_groups[test_index].group(0)
+                            while len(test_string) <= self.maximum_digits and group_count <= (len(test_string) / 4) + 1:
+                                if self.max_group_count != 0 and group_count > self.max_group_count:  # Only cards with one big number
                                     break
-                                if card.valid_luhn and \
-                                        card.issuer != 'Unknown' and \
-                                        card.iin not in self.ignore_iins and \
-                                        card.industry not in self.ignore_industries:  # Basic card check
-                                    distance = number_groups[test_index].end() - group.start()
-                                    max_distance = len(test_string) + 5
-                                    if self.max_group_distance != 0:
-                                        max_distance = self.max_group_distance
-                                    if distance < max_distance:  # Is the distance between the first card group and the last reasonable?
-                                        if self.mask_card_number:
-                                            logging.info('%s,%s,%s', filename, card.issuer, card.masked_number())
-                                            if self.output_handle is not None:
-                                                self.output_handle.write("%s,%s,%s\n" % (filename, card.issuer, card.masked_number()))
-                                        else:
-                                            logging.info('%s,%s,%s', filename, card.issuer, card.number)
-                                            if self.output_handle is not None:
-                                                self.output_handle.write(
-                                                    "%s,%s,%s\n" % (filename, card.issuer, card.number))
-                                        card_count += 1
+                                if self.cards_per_file != 0 and card_count >= self.cards_per_file:  # Restrict the count within a single file
+                                    break
+                                if len(test_string) < self.minimum_digits and len(number_groups[test_index].group(0)) < 4:  # All groupings below n digits are more than 4 digits in length
+                                    break
+
+                                if len(test_string) >= self.minimum_digits and test_string not in self.ignore_cards:  # Minimum credit card length
+                                    card = Card.fromCardNumber(test_string)
+                                    if self.ignore_deprecated and card.deprecated:
                                         break
-                            test_index += 1
-                            group_count += 1
-                            if test_index > len(number_groups) - 1:
-                                break
-                            if group_count <= 3 and len(number_groups[test_index].group(0)) < 4:
-                                break
-                            test_string += number_groups[test_index].group(0)
+                                    if card.valid_luhn and \
+                                            card.issuer != 'Unknown' and \
+                                            card.iin not in self.ignore_iins and \
+                                            card.industry not in self.ignore_industries:  # Basic card check
+                                        distance = number_groups[test_index].end() - group.start()
+                                        max_distance = len(test_string) + 5
+                                        if self.max_group_distance != 0:
+                                            max_distance = self.max_group_distance
+                                        if distance < max_distance:  # Is the distance between the first card group and the last reasonable?
+                                            if self.mask_card_number:
+                                                logging.info('%s,%s,%s', filename, card.issuer, card.masked_number())
+                                                if self.output_handle is not None:
+                                                    self.output_handle.write("%s,%s,%s\n" % (filename, card.issuer, card.masked_number()))
+                                            else:
+                                                logging.info('%s,%s,%s', filename, card.issuer, card.number)
+                                                if self.output_handle is not None:
+                                                    self.output_handle.write(
+                                                        "%s,%s,%s\n" % (filename, card.issuer, card.number))
+                                            card_count += 1
+                                            break
+                                test_index += 1
+                                group_count += 1
+                                if test_index > len(number_groups) - 1:
+                                    break
+                                if group_count <= 3 and len(number_groups[test_index].group(0)) < 4:
+                                    break
+                                test_string += number_groups[test_index].group(0)
+        except IOError as ioe:
+            logging.error('Error opening file %s, skipping (%s)' % (filename, ioe))

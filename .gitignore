@@ -5,3 +5,4 @@ app.log
 *.pyc
 *.pyo
 *.csv
+ignore_*.txt

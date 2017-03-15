@@ -131,6 +131,11 @@ ignore_industries=ignore_uatp.txt
 1
 ```
 
+Then run
+```
+python ./pantastic.py --config_file=uatp.ini
+```
+
 ## Notes
 This is a very organic project and needs considerable tidying up. It does
 comply to PEP8, but it's not particularly 'Pythonic'. It's a bit hacky in

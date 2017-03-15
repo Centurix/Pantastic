@@ -67,6 +67,10 @@ list contains just single digits from the start of each card number. These numbe
 **--ignore_deprecated**
 [*boolean*] Ignore known deprecated card IIN issuers. Default *True*
 
+**--ignore_paths**
+[*filename*] A file containing a list of paths to ignore. Default is to scan all paths
+recursively.
+
 **--minimum_digits**
 [*integer*] Only find cards with this minimum number of digits or larger. Default *12*
 

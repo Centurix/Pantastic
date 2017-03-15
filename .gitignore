@@ -6,3 +6,4 @@ app.log
 *.pyo
 *.csv
 ignore_*.txt
+!ignore_paths.txt

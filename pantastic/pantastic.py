@@ -22,7 +22,8 @@ class Pantastic:
             mask_card_number=True,
             max_group_count=0,
             max_group_distance=0,
-            output=''
+            output='',
+            ignore_paths=[]
     ):
         self.ignore_cards = ignore_cards
         self.ignore_iins = ignore_iins
@@ -37,6 +38,7 @@ class Pantastic:
         self.max_group_distance = max_group_distance
         self.output = output
         self.output_handle = None
+        self.ignore_paths = ignore_paths
 
     def scan_location(self, location):
         """
@@ -46,9 +48,12 @@ class Pantastic:
             self.output_handle = open(self.output, 'w')
             self.output_handle.write("filename,issuer,number\n")
 
-        for root, directories, files in os.walk(location):
-            for filename in files:
-                self.scan_file(os.path.join(root, filename))
+        for root, directories, files in os.walk(location, topdown=True):
+            directories[:] = [d for d in directories if os.path.join(root, d) not in self.ignore_paths]
+
+            if files is not None:
+                for filename in sorted(files):
+                    self.scan_file(os.path.join(root, filename))
 
         if self.output_handle:
             self.output_handle.close()
@@ -86,6 +91,7 @@ class Pantastic:
         file_type = None
 
         try:
+            logging.info('Opening file %s (%d Bytes), scanning for PANs...' % (filename, os.path.getsize(filename)))
             with open(filename, 'r') as file_handle:
                 mm = mmap.mmap(file_handle.fileno(), 0, prot=mmap.PROT_READ, flags=mmap.MAP_PRIVATE)
                 card_count = 0

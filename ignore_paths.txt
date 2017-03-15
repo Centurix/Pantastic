@@ -1,0 +1,11 @@
+/home
+/dev
+/bin
+/boot
+/cdrom
+/lib
+/lib32
+/lib64
+/proc
+/sbin
+/run

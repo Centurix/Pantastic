@@ -47,6 +47,11 @@ def main():
         with open(config.setting['ignore_industries'], 'r') as ignore_industries_handle:
             ignore_industries = ignore_industries_handle.read().splitlines()
 
+    ignore_paths = []
+    if config.setting['ignore_paths'] != '':
+        with open(config.setting['ignore_paths'], 'r') as ignore_paths_handle:
+            ignore_paths = ignore_paths_handle.read().splitlines()
+
     pan_manager = Pantastic(
         ignore_cards=ignore_cards,
         ignore_iins=ignore_iins,
@@ -59,7 +64,8 @@ def main():
         mask_card_number=(config.setting['mask_card_number'] == 'True' or config.setting['mask_card_number'] == True),
         max_group_count=int(config.setting['max_group_count']),
         max_group_distance=int(config.setting['max_group_distance']),
-        output=config.setting['output']
+        output=config.setting['output'],
+        ignore_paths=ignore_paths
     )
 
     if config.setting['dir'] != '':

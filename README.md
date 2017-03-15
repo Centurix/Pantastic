@@ -8,15 +8,14 @@ many different types of industries. Cards will be identified by their IIN and Lu
 compliance. Cards will be detected as single numbers or even as multiple groups of digits. Various
 options are included to assist in the identification of false positives.
 
-By default
-
 All options listed below can be used within configuration files. For example:
 
 `python ./pantastic.py --config_file=ignore_uatp.ini`
 
-`python ./pantastic.py --config_file=ignore_uatp.ini --dir=/`
+Or to override a value in a configuration file, specify the value on the
+command line.
 
-`python ./pantastic.py --config_file=banking_only.ini`
+`python ./pantastic.py --config_file=ignore_uatp.ini --dir=/`
 
 ## Usage
 

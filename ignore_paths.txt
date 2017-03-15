@@ -9,3 +9,4 @@
 /proc
 /sbin
 /run
+/sys

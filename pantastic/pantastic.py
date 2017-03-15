@@ -72,8 +72,12 @@ class Pantastic:
         """
         Scan a single file
         """
-        if os.path.getsize(filename) == 0:
-            logging.info('Empty file %s, skipping' % filename)
+        try:
+            if os.path.getsize(filename) == 0:
+                logging.info('Empty file %s, skipping' % filename)
+                return
+        except OSError as ose:
+            logging.error('Error attempting to get the filesize of %s, skipping (%s)' % (filename, ose))
             return
 
         file_components = os.path.splitext(filename)

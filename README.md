@@ -117,6 +117,9 @@ a scan will not occur.
 [*filename*] A file to scan. Either --dir or --file must be specified otherwise
 a scan will not occur.
 
+**--verbose**
+[*boolean*] Set to true to include more detail about the current scan status. Defaults to True
+
 ## Example configuration files
 
 ### Ignore UATP cards

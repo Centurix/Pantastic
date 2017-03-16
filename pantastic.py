@@ -52,6 +52,10 @@ def main():
         with open(config.setting['ignore_paths'], 'r') as ignore_paths_handle:
             ignore_paths = ignore_paths_handle.read().splitlines()
 
+    if not (config.setting['verbose'] == 'True' or config.setting['verbose'] == True) and config.setting['output'] == '':
+        logging.error('No output type specified, either set an output file with --output or turn verbose mode on')
+        return EXIT_PARAM_ERROR
+
     pan_manager = Pantastic(
         ignore_cards=ignore_cards,
         ignore_iins=ignore_iins,
@@ -65,7 +69,8 @@ def main():
         max_group_count=int(config.setting['max_group_count']),
         max_group_distance=int(config.setting['max_group_distance']),
         output=config.setting['output'],
-        ignore_paths=ignore_paths
+        ignore_paths=ignore_paths,
+        verbose=(config.setting['verbose'] == 'True' or config.setting['verbose'] == True)
     )
 
     if config.setting['dir'] != '':

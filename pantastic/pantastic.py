@@ -23,7 +23,8 @@ class Pantastic:
             max_group_count=0,
             max_group_distance=0,
             output='',
-            ignore_paths=[]
+            ignore_paths=[],
+            verbose=True
     ):
         self.ignore_cards = ignore_cards
         self.ignore_iins = ignore_iins
@@ -39,6 +40,7 @@ class Pantastic:
         self.output = output
         self.output_handle = None
         self.ignore_paths = ignore_paths
+        self.verbose = verbose
 
     def scan_location(self, location):
         """
@@ -74,7 +76,7 @@ class Pantastic:
         """
         try:
             if os.path.getsize(filename) == 0:
-                logging.info('Empty file %s, skipping' % filename)
+                logging.error('Empty file %s, skipping' % filename)
                 return
         except OSError as ose:
             logging.error('Error attempting to get the filesize of %s, skipping (%s)' % (filename, ose))
@@ -84,10 +86,10 @@ class Pantastic:
 
         if len(file_components) > 1:
             if file_components[1] != '' and file_components[1] in self.ignore_file_extensions:
-                logging.info('File: %s, in ignored extension list, skipping' % filename)
+                logging.warn('File: %s, in ignored extension list, skipping' % filename)
                 return
             if file_components[1] in ['.gz', '.zip', '.rar', '.7z', '.bzip', '.bz2']:
-                logging.info('File: %s, Compressed file, unsupported, skipping' % filename)
+                logging.warn('File: %s, Compressed file, unsupported, skipping' % filename)
                 return
 
         detector = UniversalDetector()
@@ -95,7 +97,8 @@ class Pantastic:
         file_type = None
 
         try:
-            logging.info('Opening file %s (%d Bytes), scanning for PANs...' % (filename, os.path.getsize(filename)))
+            if self.verbose:
+                logging.info('Opening file %s (%d Bytes), scanning for PANs...' % (filename, os.path.getsize(filename)))
             with open(filename, 'r') as file_handle:
                 mm = mmap.mmap(file_handle.fileno(), 0, prot=mmap.PROT_READ, flags=mmap.MAP_PRIVATE)
                 card_count = 0
@@ -152,11 +155,13 @@ class Pantastic:
                                             max_distance = self.max_group_distance
                                         if distance < max_distance:  # Is the distance between the first card group and the last reasonable?
                                             if self.mask_card_number:
-                                                logging.info('%s,%s,%s', filename, card.issuer, card.masked_number())
+                                                if self.verbose:
+                                                    logging.info('%s,%s,%s', filename, card.issuer, card.masked_number())
                                                 if self.output_handle is not None:
                                                     self.output_handle.write("%s,%s,%s\n" % (filename, card.issuer, card.masked_number()))
                                             else:
-                                                logging.info('%s,%s,%s', filename, card.issuer, card.number)
+                                                if self.verbose:
+                                                    logging.info('%s,%s,%s', filename, card.issuer, card.number)
                                                 if self.output_handle is not None:
                                                     self.output_handle.write(
                                                         "%s,%s,%s\n" % (filename, card.issuer, card.number))

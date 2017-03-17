@@ -14,12 +14,12 @@ class Pantastic:
             ignore_cards=[],
             ignore_iins=[],
             ignore_industries=[],
-            ignore_deprecated=True,
+            include_deprecated=False,
             minimum_digits=12,
             maximum_digits=19,
             cards_per_file=0,
             ignore_file_extensions=[],
-            mask_card_number=True,
+            unmask_card_number=False,
             max_group_count=0,
             max_group_distance=0,
             output='',
@@ -29,12 +29,12 @@ class Pantastic:
         self.ignore_cards = ignore_cards
         self.ignore_iins = ignore_iins
         self.ignore_industries = ignore_industries
-        self.ignore_deprecated = ignore_deprecated
+        self.include_deprecated = include_deprecated
         self.minimum_digits = minimum_digits
         self.maximum_digits = maximum_digits
         self.cards_per_file = cards_per_file
         self.ignore_file_extensions = ignore_file_extensions
-        self.mask_card_number = mask_card_number
+        self.unmask_card_number = unmask_card_number
         self.max_group_count = max_group_count
         self.max_group_distance = max_group_distance
         self.output = output
@@ -143,7 +143,7 @@ class Pantastic:
 
                                 if len(test_string) >= self.minimum_digits and test_string not in self.ignore_cards:  # Minimum credit card length
                                     card = Card.fromCardNumber(test_string)
-                                    if self.ignore_deprecated and card.deprecated:
+                                    if not self.include_deprecated and card.deprecated:
                                         break
                                     if card.valid_luhn and \
                                             card.issuer != 'Unknown' and \
@@ -154,17 +154,17 @@ class Pantastic:
                                         if self.max_group_distance != 0:
                                             max_distance = self.max_group_distance
                                         if distance < max_distance:  # Is the distance between the first card group and the last reasonable?
-                                            if self.mask_card_number:
-                                                if self.verbose:
-                                                    logging.info('%s,%s,%s', filename, card.issuer, card.masked_number())
-                                                if self.output_handle is not None:
-                                                    self.output_handle.write("%s,%s,%s\n" % (filename, card.issuer, card.masked_number()))
-                                            else:
+                                            if self.unmask_card_number:
                                                 if self.verbose:
                                                     logging.info('%s,%s,%s', filename, card.issuer, card.number)
                                                 if self.output_handle is not None:
                                                     self.output_handle.write(
                                                         "%s,%s,%s\n" % (filename, card.issuer, card.number))
+                                            else:
+                                                if self.verbose:
+                                                    logging.info('%s,%s,%s', filename, card.issuer, card.masked_number())
+                                                if self.output_handle is not None:
+                                                    self.output_handle.write("%s,%s,%s\n" % (filename, card.issuer, card.masked_number()))
                                             card_count += 1
                                             break
                                 test_index += 1

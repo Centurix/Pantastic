@@ -96,10 +96,23 @@ def create_options(config_spec):
         add_help=True
     )
     for config_item in config_spec.configspec['default']:
-        options_parser.add_argument(
-            '--%s' % config_item,
-            dest=config_item
-        )
+        if config_spec.configspec['default'][config_item][:7] == 'boolean':
+            options_parser.add_argument(
+                '--%s' % config_item,
+                dest=config_item,
+                action='store_true'
+            )
+        elif config_spec.configspec['default'][config_item][:7] == 'integer':
+            options_parser.add_argument(
+                '--%s' % config_item,
+                type=int,
+                dest=config_item
+            )
+        else:
+            options_parser.add_argument(
+                '--%s' % config_item,
+                dest=config_item
+            )
 
     options_parser.add_argument(
         '-v',

@@ -17,9 +17,19 @@ command line.
 
 `python ./pantastic.py --config_file=ignore_uatp.ini --dir=/`
 
+## Quickstart
+
+Download or clone this into a folder somewhere. Include it in your path if you like. Then:
+
+`python ./pantastic.py --dir=/ --ignore_paths=ignore_paths.txt --ignore_file_extensions=ignore_extensions.txt --verbose=True`
+
+This will scan the root of a PC, ignoring common file extensions and common
+Linux paths which don't really store data and then send the results to the
+screen.
+
 ## Usage
 
-python ./pantastic.py [--config_file=*file*] [--log_file=*file*] [--log_level=*level*] [--ignore_cards=*list file*] [--ignore_iins=*list file*] [--ignore_industries=*list file*] [--ignore_deprecated=*boolean*] [--minimum_digits=*integer*] [--maximum_digits=*integer*] [--cards_per_file=*integer*] [--ignore_file_extensions=*list file*] [--mask_card_number=*boolean*] [--max_group_count=*integer*] [--max_group_distance=*integer*] [--output=*file*] --dir=*location* *or* --file=*file*
+python ./pantastic.py [--config_file=*file*] [--log_file=*file*] [--log_level=*level*] [--ignore_cards=*list file*] [--ignore_iins=*list file*] [--ignore_industries=*list file*] [--include_deprecated] [--minimum_digits=*integer*] [--maximum_digits=*integer*] [--cards_per_file=*integer*] [--ignore_file_extensions=*list file*] [--unmask_card_number] [--max_group_count=*integer*] [--max_group_distance=*integer*] [--output=*file*] [--verbose] --dir=*location* *or* --file=*file*
 
 **--config_file**
 [*filename*] A config file to use during operation. Files are in INI file format and the
@@ -64,8 +74,8 @@ list contains just single digits from the start of each card number. These numbe
 * **8**	- Healthcare, telecommunications and other future industry assignments
 * **9**	- For assignment by national standards bodies
 
-**--ignore_deprecated**
-[*boolean*] Ignore known deprecated card IIN issuers. Default *True*
+**--include_deprecated**
+[*boolean*] Include known deprecated card IIN issuers.
 
 **--ignore_paths**
 [*filename*] A file containing a list of paths to ignore. Default is to scan all paths
@@ -85,8 +95,9 @@ all card numbers in each file. Default *0*
 [*filename*] A file containing a list of file extensions to ignore. Each extension must
 be listed including the leading period (.), for example .dll, .exe, .ttf
 
-**--mask_card_number**
-[*boolean*] Mask the central account number portion of the card number with 'X'. Default *True*
+**--unmask_card_number**
+[*boolean*] Show the full card number. By default the central account number
+portion of the card number is masked with 'X'. Default *False*
 
 **--max_group_count**
 [*integer*] Specify the maximum number of digit groups to find within each file. Sometimes
@@ -109,6 +120,9 @@ the number plus 5. Default 0
 [*filename*] Send the found cards to this file in a CSV format containing the filename, issuer
 and card number obeying the *--mask_card_number* option above.
 
+**--verbose**
+[*boolean*] Set to true to include more detail about the current scan status. Defaults to True
+
 **--dir**
 [*directory*] A directory to scan. Either --dir or --file must be specified otherwise
 a scan will not occur.
@@ -116,9 +130,6 @@ a scan will not occur.
 **--file**
 [*filename*] A file to scan. Either --dir or --file must be specified otherwise
 a scan will not occur.
-
-**--verbose**
-[*boolean*] Set to true to include more detail about the current scan status. Defaults to True
 
 ## Example configuration files
 
@@ -224,3 +235,5 @@ script manually.
 Add output options for XML, JSON, HTML etc. Currently only does CSV.
 
 Actually start on compressed file support. http://stackoverflow.com/questions/5127921/can-mmap-and-gzip-collaborate
+
+Provide PIP and other types of installs

@@ -52,7 +52,12 @@ def main():
         with open(config.setting['ignore_paths'], 'r') as ignore_paths_handle:
             ignore_paths = ignore_paths_handle.read().splitlines()
 
-    if not (config.setting['verbose'] == 'True' or config.setting['verbose'] == True) and config.setting['output'] == '':
+    ignore_file_extensions = []
+    if config.setting['ignore_file_extensions'] != '':
+        with open(config.setting['ignore_file_extensions'], 'r') as ignore_file_extensions_handle:
+            ignore_file_extensions = ignore_file_extensions_handle.read().splitlines()
+
+    if not config.setting['verbose'] and config.setting['output'] == '':
         logging.error('No output type specified, either set an output file with --output or turn verbose mode on')
         return EXIT_PARAM_ERROR
 
@@ -60,17 +65,17 @@ def main():
         ignore_cards=ignore_cards,
         ignore_iins=ignore_iins,
         ignore_industries=ignore_industries,
-        ignore_deprecated=(config.setting['ignore_deprecated'] == 'True' or config.setting['ignore_deprecated'] == True),
-        minimum_digits=int(config.setting['minimum_digits']),
-        maximum_digits=int(config.setting['maximum_digits']),
-        cards_per_file=int(config.setting['cards_per_file']),
-        ignore_file_extensions=config.setting['ignore_file_extensions'],
-        mask_card_number=(config.setting['mask_card_number'] == 'True' or config.setting['mask_card_number'] == True),
-        max_group_count=int(config.setting['max_group_count']),
-        max_group_distance=int(config.setting['max_group_distance']),
+        include_deprecated=config.setting['include_deprecated'],
+        minimum_digits=config.setting['minimum_digits'],
+        maximum_digits=config.setting['maximum_digits'],
+        cards_per_file=config.setting['cards_per_file'],
+        ignore_file_extensions=ignore_file_extensions,
+        unmask_card_number=config.setting['unmask_card_number'],
+        max_group_count=config.setting['max_group_count'],
+        max_group_distance=config.setting['max_group_distance'],
         output=config.setting['output'],
         ignore_paths=ignore_paths,
-        verbose=(config.setting['verbose'] == 'True' or config.setting['verbose'] == True)
+        verbose=config.setting['verbose']
     )
 
     if config.setting['dir'] != '':

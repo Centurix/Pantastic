@@ -1,10 +1,9 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
 import logging
 import os
+import click
 import mmap
 import re
-from card import Card
+from .card import Card
 from chardet.universaldetector import UniversalDetector
 
 
@@ -46,7 +45,7 @@ class Pantastic:
         """
         Walk a directory path recursively
         """
-        if self.output != '':
+        if self.output:
             self.output_handle = open(self.output, 'w')
             self.output_handle.write("filename,issuer,number\n")
 
@@ -76,20 +75,28 @@ class Pantastic:
         """
         try:
             if os.path.getsize(filename) == 0:
-                logging.error('Empty file %s, skipping' % filename)
+                click.echo(f"Empty file {filename}, skipping")
                 return
         except OSError as ose:
-            logging.error('Error attempting to get the filesize of %s, skipping (%s)' % (filename, ose))
+            click.echo(
+                f"Error attempting to get the filesize of {filename}, skipping ({ose})",
+                err=True
+            )
             return
 
         file_components = os.path.splitext(filename)
 
         if len(file_components) > 1:
             if file_components[1] != '' and file_components[1] in self.ignore_file_extensions:
-                logging.warn('File: %s, in ignored extension list, skipping' % filename)
+                click.echo(
+                    f"File: {filename}, in ignored extension list, skipping"
+                )
                 return
             if file_components[1] in ['.gz', '.zip', '.rar', '.7z', '.bzip', '.bz2']:
-                logging.warn('File: %s, Compressed file, unsupported, skipping' % filename)
+                click.echo(
+                    f"File: {filename}, Compressed file, unsupported, skipping",
+                    err=True
+                )
                 return
 
         detector = UniversalDetector()
@@ -98,7 +105,10 @@ class Pantastic:
 
         try:
             if self.verbose:
-                logging.info('Opening file %s (%d Bytes), scanning for PANs...' % (filename, os.path.getsize(filename)))
+                click.echo(
+                    f"Opening file {filename} ({os.path.getsize(filename)} Bytes), "
+                    "scanning for PANs..."
+                )
             with open(filename, 'r') as file_handle:
                 mm = mmap.mmap(file_handle.fileno(), 0, prot=mmap.PROT_READ, flags=mmap.MAP_PRIVATE)
                 card_count = 0
@@ -121,9 +131,9 @@ class Pantastic:
                         detector.close()
 
                     if file_type[:6] == 'UTF-16':
-                        number_groups = list(re.finditer('\d{1,19}', file_buffer.replace('\x00', ''), re.MULTILINE | re.DOTALL))
+                        number_groups = list(re.finditer(b'\d{1,19}', file_buffer.replace('\x00', ''), re.MULTILINE | re.DOTALL))
                     else:
-                        number_groups = list(re.finditer('\d{1,19}', file_buffer, re.MULTILINE | re.DOTALL))
+                        number_groups = list(re.finditer(b'\d{1,19}', file_buffer, re.MULTILINE | re.DOTALL))
 
                     for index, group in enumerate(number_groups):
                         if self.cards_per_file != 0 and card_count >= self.cards_per_file:
@@ -142,7 +152,7 @@ class Pantastic:
                                     break
 
                                 if len(test_string) >= self.minimum_digits and test_string not in self.ignore_cards:  # Minimum credit card length
-                                    card = Card.fromCardNumber(test_string)
+                                    card = Card.fromCardNumber(test_string.decode("utf-8"))
                                     if not self.include_deprecated and card.deprecated:
                                         break
                                     if card.valid_luhn and \
@@ -156,15 +166,15 @@ class Pantastic:
                                         if distance < max_distance:  # Is the distance between the first card group and the last reasonable?
                                             if self.unmask_card_number:
                                                 if self.verbose:
-                                                    logging.info('%s,%s,%s', filename, card.issuer, card.number)
+                                                    click.echo(f"{filename},{card.issuer},{card.number}")
                                                 if self.output_handle is not None:
                                                     self.output_handle.write(
-                                                        "%s,%s,%s\n" % (filename, card.issuer, card.number))
+                                                        f"{filename},{card.issuer},{card.number}\n")
                                             else:
                                                 if self.verbose:
-                                                    logging.info('%s,%s,%s', filename, card.issuer, card.masked_number())
+                                                    click.echo(f'{filename},{card.issuer},{card.masked_number()}')
                                                 if self.output_handle is not None:
-                                                    self.output_handle.write("%s,%s,%s\n" % (filename, card.issuer, card.masked_number()))
+                                                    self.output_handle.write(f"{filename},{card.issuer},{card.masked_number()}\n")
                                             card_count += 1
                                             break
                                 test_index += 1
@@ -175,4 +185,4 @@ class Pantastic:
                                     break
                                 test_string += number_groups[test_index].group(0)
         except IOError as ioe:
-            logging.error('Error opening file %s, skipping (%s)' % (filename, ioe))
+            click.echo(f"Error opening file {filename}, skipping ({ioe})")

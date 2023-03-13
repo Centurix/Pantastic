@@ -1,6 +1,3 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-
 """
 Build a new card class where groups of numbers are passed in
 The card class looks at the card groupings as well as the total card length, IIN and luhn

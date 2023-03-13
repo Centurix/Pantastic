@@ -17,6 +17,22 @@ command line.
 
 `python ./pantastic.py --config_file=ignore_uatp.ini --dir=/`
 
+# Installation
+
+This version has been updated to support Python 3. Due to the conversion, some of the old 2.x standard
+libraries have been replaced. This project now uses [PDM](https://pdm.fming.dev/latest/) as its dependency manager.
+
+You will also need Python 3.9+ to run this.
+
+Once PDM is installed, to install dependencies you can issue the command:
+
+`pdm install`
+
+This will attempt to install the required dependencies for this project.
+
+PLEASE NOTE THAT THE PYTHON 3.x CONVERSION GETS THE PROJECT INTO A WORKING
+STATE AND IS NOT A COMPLETE RE-WRITE OF THE APPLICATION.
+
 ## Quickstart
 
 Download or clone this into a folder somewhere. Include it in your path if you like. Then:

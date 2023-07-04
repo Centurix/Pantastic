@@ -60,7 +60,7 @@ class Pantastic:
             self.output_handle.close()
 
     def scan_file_with_output(self, filename):
-        if self.output != '':
+        if self.output:
             self.output_handle = open(self.output, 'w')
             self.output_handle.write("filename,issuer,number\n")
 
@@ -74,6 +74,10 @@ class Pantastic:
         Scan a single file
         """
         try:
+            if not filename:
+                click.echo(f"NOT VALID {filename}")
+                return
+
             if os.path.getsize(filename) == 0:
                 click.echo(f"Empty file {filename}, skipping")
                 return
@@ -131,7 +135,7 @@ class Pantastic:
                         detector.close()
 
                     if file_type[:6] == 'UTF-16':
-                        number_groups = list(re.finditer(b'\d{1,19}', file_buffer.replace('\x00', ''), re.MULTILINE | re.DOTALL))
+                        number_groups = list(re.finditer(b'\d{1,19}', file_buffer.replace(b'\x00', b''), re.MULTILINE | re.DOTALL))
                     else:
                         number_groups = list(re.finditer(b'\d{1,19}', file_buffer, re.MULTILINE | re.DOTALL))
 

@@ -101,11 +101,12 @@ def main(
         ignore_paths=ignore_path_list,
         verbose=verbose
     )
-    if dir != '':
+    if dir:
         pan_manager.scan_location(dir)
-
-    if file != '':
+    if file:
         pan_manager.scan_file_with_output(file)
+
+    click.echo("Scan complete")
 
     return EXIT_OK
 

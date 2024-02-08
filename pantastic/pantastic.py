@@ -155,7 +155,7 @@ class Pantastic:
                                 if len(test_string) < self.minimum_digits and len(number_groups[test_index].group(0)) < 4:  # All groupings below n digits are more than 4 digits in length
                                     break
 
-                                if len(test_string) >= self.minimum_digits and test_string not in self.ignore_cards:  # Minimum credit card length
+                                if len(test_string) >= self.minimum_digits and test_string.decode("utf-8") not in self.ignore_cards:  # Minimum credit card length
                                     card = Card.fromCardNumber(test_string.decode("utf-8"))
                                     if not self.include_deprecated and card.deprecated:
                                         break
